@@ -34,9 +34,13 @@ class LinkLibraryTest(TestCase):
     self.assertEquals(response.status_code, 200)
 
   def test_create(self):
-    response = self.client.post('/create-library/', {'name': 'test library', 'desc': 'test description', 'links': '1,2', 'tags':'HotButton, WarmButton,'})
+    links = "1, 2"
+    tags = "HotButton,WarmButton"
+    response = self.client.post('/create-library/', {'name': 'test library', 'desc': 'test description', 'links': links, 'tags': tags })
     self.assertEquals(response.status_code, 200)
     self.assertEquals(LinkLibrary.objects.count(), 1)
+    user = CoreUser.objects.get(username='testuser')
+    self.assertEquals(1, user.libraries.count())
 
     library = LinkLibrary.objects.get(pk=1)
     self.assertEquals(library.links.count(), 2)
@@ -49,6 +53,7 @@ class LinkLibraryTest(TestCase):
     self.assertEquals(library.tags.count(), 2)
     self.assertEquals(library.tags.get(name='HotButton').name, 'HotButton')
     self.assertEquals(library.tags.get(name='WarmButton').name, 'WarmButton')
+    
     # print 'Passed the create link library test.'
 
   def test_add_single(self):
@@ -74,6 +79,20 @@ class LinkLibraryTest(TestCase):
     self.assertEquals(libraries.count(), 2)
     self.assertEquals(libraries[0].name, link_library1.name)
     self.assertEquals(libraries[1].name, link_library2.name)
+
+  def test_delete_single(self):
+    user = CoreUser.objects.get(username='testuser')
+    link_library1 = LinkLibrary.objects.create(name='library1', desc='just a test', creator=user)
+    library = LinkLibrary.objects.get(pk=1)
+    user.libraries.add(library)
+    user.save()
+    self.assertEquals(1, user.libraries.count())
+    # for i in user.libraries.all():
+    #  print i.pk
+    response = self.client.post('/delete-libraries/', { 'library_id': 1 })
+    self.assertEqual(response.status_code, 200)
+    user = CoreUser.objects.get(username='testuser')
+    self.assertEqual(0, user.libraries.count())
 
 
 class LoginTest(TestCase):
@@ -107,7 +126,7 @@ class LogoutTest(TestCase):
 
 
 class TrophyTest(TestCase):
-  def  setUp(self):
+  def   setUp(self):
     self.user = CoreUser(sid='anything', username='testuser', first_name='Joe', last_name='Anybody', email='prcoleman2@gmail.com',
         phone_number='9221112222')
     self.user.set_password('2pass')
@@ -189,7 +208,7 @@ class KmzTest(TestCase):
     self.assertTrue(self.client.login(username='testuser', password='2pass'))
 
   def test_get_kmz(self):
-    response = self.client.get('/getkmz/')
+    response = self.client.get('/export-kmz/')
 
     with open('download.kmz', 'wb') as f:
       f.write(response.content)
@@ -210,6 +229,61 @@ class KmzTest(TestCase):
     os.remove('download.kmz')
     
     #print 'Passed the get_kmz test.'
+
+
+class PasswordTest(TestCase):
+  def setUp(self):
+    self.user = CoreUser(sid='anything', username='testuser', first_name='Joe', last_name='Anybody', email='prcoleman2@gmail.com',
+        phone_number='9221112222')
+    self.user.set_password('2pass')
+    self.user.save()
+
+    self.assertTrue(self.client.login(username='testuser', password='2pass'))
+
+  def test_view_password(self):
+    response = self.client.get('/update-password/')
+    self.assertEquals(response.status_code, 200)
+    
+  def test_update_password(self):
+    response = self.client.post('/update-password/', {'old' : '2pass', 'password' : 'newpass'})
+    self.assertRedirects(response, '/update-password/?saved=True')
+    self.assertTrue(self.client.login(username='testuser', password='newpass'))
+
+  def test_wrong_current_password(self):
+    response = self.client.post('/update-password/', {'old' : 'nothing', 'password' : 'anything'})
+    self.assertContains(response, 'Please try again.', count=1)
+
+  def test_same_passwords(self):
+    response = self.client.post('/update-password/', {'old' : '2pass', 'password' : '2pass'})
+    self.assertContains(response, 'Please try again.', count=1)
+
+class ProfileTest(TestCase):
+  def setUp(self):
+    self.user = CoreUser(sid='anything', username='testuser', first_name='Joe', last_name='Anybody', email='prcoleman2@gmail.com',
+        phone_number='9221112222')
+    self.user.set_password('2pass')
+    self.user.save()
+
+    self.assertTrue(self.client.login(username='testuser', password='2pass'))
+
+  def test_profile_update(self):
+    response = self.client.get('/user-profile/')
+    self.assertEquals(response.status_code, 200)
+
+    response = self.client.post('/update-user/', { 'sid' : 'anything', 'first_name' : 'Bill', 'last_name' : 'Somebody',
+      'phone_number': '9998887777', 'email': 'pcol@anywhere.com'})
+    self.assertEquals(response.status_code, 302)
+    self.assertRedirects(response, '/user-profile/?saved=True', status_code=302, target_status_code=200)
+
+    response = self.client.get('/user-profile/?saved=True')
+    self.assertContains(response, 'Your profile changes have been saved', count=1, status_code=200)
+
+    user = CoreUser.objects.get(sid='anything')
+    self.assertEquals(user.first_name, 'Bill')
+    self.assertEquals(user.last_name, 'Somebody')
+    self.assertEquals(user.email, 'pcol@anywhere.com')
+    self.assertEquals(user.phone_number, long('9998887777'))
+    # print 'Passed the UpdateProfile test.'
 
 
 class SearchTest(TestCase):
@@ -421,7 +495,7 @@ class ShapefileTest(TestCase):
     self.assertTrue(self.client.login(username='testuser', password='2pass'))
 
   def test_get_shapefile(self):
-    response = self.client.get('/getshp/')
+    response = self.client.get('/export-shp/')
 
     with open('sample.zip', 'wb') as f:
       f.write(response.content)
@@ -441,6 +515,17 @@ class ShapefileTest(TestCase):
 
     #print 'Passed the get_shapefile test.'
  
+
+class FutureFeatureTest(TestCase):
+
+  def test_getpage(self):
+    response = self.client.get('/future-feature/')
+    self.assertEquals(response.status_code, 200)
+    self.assertTemplateUsed(response, 'future.html', msg_prefix='')
+    self.assertContains(response, 'We\'re sorry', count=1, status_code=200, msg_prefix='')
+
+    # print 'Passed the futurefeature test.'
+
 
 class NotificationTest(TestCase):
   def setUp(self):
@@ -567,7 +652,7 @@ class RateTest(TestCase):
 
 
 class SettingsTest(TestCase):
-  def setUp(self):
+  def setUp(self): 
     self.user = CoreUser(sid='anything', username='testuser', first_name='Joe', last_name='Anybody', email='prcoleman2@gmail.com',
         phone_number='9221112222')
     self.user.set_password('2pass')
@@ -587,7 +672,7 @@ class SettingsTest(TestCase):
     skin = Skin.objects.create(name='Default2', file_path='/default.css')
     
     response = self.client.post('/settings/', {'skin': 'Default2'})
-    self.assertRedirects(response, '/settings/')
+    self.assertRedirects(response, '/settings/?saved=True')
 
     settings = CoreUser.objects.get(username=self.user.username).settings
     self.assertFalse(settings.wants_emails)
