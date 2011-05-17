@@ -87,6 +87,7 @@ TEMPLATE_DIRS = (
     'C:/dev/Django-1.2.3/uCORE/coreo/templates/ucore/',
     '/Users/pboone/code/ucore/coreo/templates/ucore/',
     '/Users/pcoleman/uCORE/coreo/templates/ucore/',
+    '/Users/alan/uCORE2/uCORE/coreo/templates/ucore',
 )
 
 INSTALLED_APPS = (
