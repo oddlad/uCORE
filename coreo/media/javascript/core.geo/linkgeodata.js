@@ -221,7 +221,7 @@ if (!window.core.geo)
 			 */
 			addChild: function(geodata, onComplete, onError) {
 				throw "Not implemented";
-			},
+			}
 		});
 	};
 	ns.LinkGeoData = LinkGeoData;

@@ -4,7 +4,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Jason Cooper', 'skawaii@gmail.com'),
+    ('CORE Dev', 'coredev@layeredintel.com'),
 )
 
 MANAGERS = ADMINS
@@ -12,7 +12,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'db/coreo.db',                  # Or path to database file if using sqlite3.
+        'NAME': '/home/core/webapps/ucore/coreo/db/coreo.db',                  # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -57,8 +57,6 @@ MEDIA_URL = '/site_media/'
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '3e@l)b3b7!q@x558r%)cccigl5mb)!&ius9*4h2@9-t+=$rrq1'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -88,6 +86,7 @@ TEMPLATE_DIRS = (
     '/Users/pboone/code/ucore/coreo/templates/ucore/',
     '/Users/pcoleman/uCORE/coreo/templates/ucore/',
     '/Users/alan/uCORE2/uCORE/coreo/templates/ucore',
+    '/home/core/webapps/ucore/core/templates/ucore/',
 )
 
 INSTALLED_APPS = (
@@ -105,25 +104,12 @@ INSTALLED_APPS = (
     #'compress',
 )
 
-SITE_ROOT = 'http://localhost:8080/'
-
 LOGIN_URL = '/login'
 
 SERIALIZATION_MODULES = {
     'json': 'wadofstuff.django.serializers.json'
 }
 
-import logging
-
-try:
-  from local_settings import *
-  logging.basicConfig(
-      level=logging.DEBUG,
-      filename='ucore.log',
-      filemode = 'w'
-  )
-except ImportError, exp:
-   pass
 
 try:
   INSTALLED_APPS += LOCAL_INSTALLED_APPS

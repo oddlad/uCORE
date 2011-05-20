@@ -63,7 +63,7 @@ class Trophy(models.Model):
 class POC(models.Model):
   first_name = models.CharField(max_length=20)
   last_name = models.CharField(max_length=20)
-  phone_number = models.PositiveSmallIntegerField()
+  phone_number = models.CharField(max_length=255)
   email = models.EmailField(unique=True)
 
   def __unicode__(self):

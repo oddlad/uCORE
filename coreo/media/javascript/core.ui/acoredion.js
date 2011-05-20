@@ -14,6 +14,7 @@
  *   - core.geo.GeoDataStore 
  *   - core.util.GeoDataVisitor
  *   - core.events.GeoDataUnloadedEvent
+ *   - core.util.Assert
  */
 if (!window.core)
 	window.core = {};
@@ -21,6 +22,9 @@ if (!window.core.ui)
 	window.core.ui = {};
 
 (function($, ns) {
+	var Assert = core.util.Assert;
+	if (!Assert)
+		throw "Dependency not found: core.util.Assert";
 	var IdSequence = core.util.IdSequence;
 	if (!IdSequence)
 		throw "Dependency not found: core.util.IdSequence";
@@ -48,21 +52,24 @@ if (!window.core.ui)
 	var GeoDataUnloadedEvent = core.events.GeoDataUnloadedEvent;
 	if (!GeoDataUnloadedEvent)
 		throw "Dependency not found: core.events.GeoDataUnloadedEvent";
-	
+
 	var findFirstNamedChild = function(geodata) {
-		var name = geodata.getName();
-		if (!name) {
-			var firstChild = null;
-			var multipleChildren = false;
-			geodata.iterateChildren($.proxy(function(child) {
-				if (firstChild) {
-					multipleChildren = true;
-					return false;
+		var name, firstChild, multipleChildren;
+		if (geodata) {
+			name = geodata.getName();
+			if (!name) {
+				firstChild = null;
+				multipleChildren = false;
+				geodata.iterateChildren($.proxy(function(child) {
+					if (firstChild) {
+						multipleChildren = true;
+						return false;
+					}
+					firstChild = child;
+				}, this));
+				if (!multipleChildren && firstChild) {
+					return findFirstNamedChild(firstChild);
 				}
-				firstChild = child;
-			}, this));
-			if (!multipleChildren && firstChild) {
-				return findFirstNamedChild(firstChild);
 			}
 		}
 		return geodata;
@@ -226,6 +233,7 @@ if (!window.core.ui)
 		},
 
 		_treeLoaded: function(id, geodata) {
+			Assert.notNull(geodata, "geodata cannot be null");
 			geodata = findFirstNamedChild(geodata);
 			var treeEl = $(this.el).find("> .ui-widget-content > "
 					+ ".acoredion-tree-container "

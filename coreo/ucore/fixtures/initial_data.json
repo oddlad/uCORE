@@ -70,8 +70,8 @@
     "model": "ucore.Trophy",
     "pk": 2,
     "fields": {
-      "name": "Artic King",
-      "desc": "For 5 searches in the artic.",
+      "name": "Arctic King",
+      "desc": "For 5 searches in the arctic.",
       "tag": 3,
       "earning_req": 5,
       "file_path": "images/snowmountain.jpg"

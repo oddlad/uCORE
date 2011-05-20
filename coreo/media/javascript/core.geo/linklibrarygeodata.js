@@ -256,7 +256,7 @@ if (!window.core.geo)
 			addChild: function(geodata, onComplete, onError) {
 				// TODO
 				throw "Not implemented";
-			},
+			}
 		});
 		return _this;
 	};

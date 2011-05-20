@@ -101,7 +101,8 @@ if (!window.core.services)
 						[text, text, null]);
 				this.geoDataRetriever.fetch(text)
 					.then(function(geodata) {
-						CallbackUtils.invokeCallback(callback, geodata, "resultSuccess");
+						CallbackUtils.invokeCallback(callback, 
+								[text, geodata], "resultSuccess");
 						CallbackUtils.invokeOptionalCallback(callback, "complete");
 					},
 					function(errorThrown) {

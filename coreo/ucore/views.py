@@ -881,8 +881,8 @@ def trophy_room(request):
         else:
           earn_progress += [0]
           percentage += [(o.count / t.earning_req)*100]
-    print 'total earn_progress looks like: ', earn_progress
-    print 'total percentage is : ', percentage
+    # print 'total earn_progress looks like: ', earn_progress
+    # print 'total percentage is : ', percentage
     combine_list = zip(trophy_list, earn_progress, percentage)
   except CoreUser.DoesNotExist:
     # as long as the login_user view forces them to register if they don't already
@@ -971,6 +971,7 @@ def update_password(request):
        
 
 @require_http_methods(['GET', 'POST'])
+@login_required
 def upload_csv(request):
   utils.insert_links_from_csv(request.FILES['file'])
 

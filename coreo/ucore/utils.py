@@ -89,7 +89,16 @@ def insert_links_from_csv(csv_file):
 
     link['tags'] = link['tags'].strip('"')
 
-    db_link = Link(name=link['name'], url=link['url'], desc=link['description'], poc=db_poc)
+    db_link = Link.objects.filter(url = link['url'])
+    if db_link.count() > 0:
+      db_link = db_link[0]
+      print "Updating Link: %s" % link['url']
+      db_link.name = link['name']
+      db_link.desc = link['description']
+      db_link.poc = db_poc 
+    else:
+      print "Inserting link: %s" % link['url']
+      db_link = Link(name=link['name'], url=link['url'], desc=link['description'], poc=db_poc)
     db_link.save()
 
     for tag in link['tags'].split(','):

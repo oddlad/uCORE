@@ -271,7 +271,7 @@ if (!window.core.services)
 					}
 					return library;
 				});
-			},
+			}
 		};
 		return _this;
 	};
