@@ -971,6 +971,7 @@ def update_password(request):
        
 
 @require_http_methods(['GET', 'POST'])
+@login_required
 def upload_csv(request):
   if request.method == 'GET':
     return render_to_response('upload_csv.html', context_instance=RequestContext(request))
